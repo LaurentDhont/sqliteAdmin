@@ -1,0 +1,414 @@
+<nav class="navbar bg-light">
+    <a class="navbar-brand">SQLite Admin</a>
+    <a href="/settings"><i class="fas fa-cog fa-2x float-right"></i></a>
+</nav>
+
+<div class="container-fluid mt-2">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/databases">Databases</a></li>
+
+            <li class="breadcrumb-item active" aria-current="page">{{database.name}}</li>
+        </ol>
+    </nav>
+
+<!--    <h3 class="text-center">{{database.name}}</h3>-->
+
+    {{#each errors as |error|}}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{error}}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {{/each}}
+
+    <ul class="nav nav-tabs mb-4" role="tablist" id="myTab">
+        <li class="nav-item">
+            {{#if sqlActive}}
+                <a class="nav-link" id="browse-tab" data-toggle="tab" href="#browseDiv" role="tab" aria-controls="browseDiv" aria-selected="false">Browse</a>
+            {{else}}
+                <a class="nav-link active" id="browse-tab" data-toggle="tab" href="#browseDiv" role="tab" aria-controls="browseDiv" aria-selected="true">Browse</a>
+            {{/if}}
+        </li>
+        <li class="nav-item">
+            {{#if sqlActive}}
+                <a class="nav-link active" id="sql-tab" data-toggle="tab" href="#sql" role="tab" aria-controls="sql" aria-selected="true">SQL</a>
+            {{else}}
+                <a class="nav-link" id="sql-tab" data-toggle="tab" href="#sql" role="tab" aria-controls="sql" aria-selected="false">SQL</a>
+            {{/if}}
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        {{#if sqlActive}}
+            <div class="row tab-pane fade" role="tabpanel" aria-labelledby="browseDiv" id="browseDiv">
+        {{else}}
+            <div class="row tab-pane fade show active" role="tabpanel" aria-labelledby="browseDiv" id="browseDiv">
+        {{/if}}
+        <div class="row p-3">
+            <div class="col">
+                {{#if database.tables}}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-sm">
+                            <caption>Tables</caption>
+                            <thead class="thead-dark">
+                            <tr>
+                                <th>Name</th>
+                                <th>Records</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{#each database.tables as |table|}}
+                                <tr>
+                                    <td>
+                                        <form action="/databases/getTable">
+                                            <input type="hidden" name="location" value="{{../database.location}}">
+                                            <input type="hidden" name="table" value="{{table.name}}">
+                                            <a onclick="this.parentElement.submit()" href="#">{{table.name}}</a>
+                                        </form>
+                                    </td>
+                                    <td>{{table.records}}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#import{{table.name}}">Import</button>
+                                        <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#export{{table.name}}">Quick export</button>
+                                        <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#generateStatementModal{{table.name}}">Generate statement</button>
+                                        <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#clone{{table.name}}">Clone</button>
+                                        <button type="button" data-toggle="modal" data-target="#delete{{table.name}}"  class="btn btn-sm btn-danger">Delete</button>
+
+                                    </td>
+                                </tr>
+                                <div class="modal fade" id="generateStatementModal{{table.name}}" tabindex="-1" role="dialog" aria-labelledby="generateStatementModal{{table.name}}" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Generate statement for {{table.name}}</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="form-group">
+                                                    <label for="type{{table.name}}">Type:</label>
+                                                    <select id="type{{table.name}}" class="form-control">
+                                                        <option value="select">Select</option>
+                                                        <option value="insert">Insert</option>
+                                                        <option value="update">Update</option>
+                                                    </select>
+                                                    <label class="mt-1">Include where: <input id="where{{table.name}}" type="checkbox" name="where"></label>
+                                                    <textarea class="form-control mt-1" id="placeHolder{{table.name}}" placeholder="Statement will come here"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer mx-auto">
+                                                <button type="button" class="btn btn-info"
+                                                        onclick="generateStatement(document.getElementById('type{{table.name}}'),
+                                                                document.getElementById('placeHolder{{table.name}}'), '{{table.name}}', document.getElementById('where{{table.name}}'))">Generate statement</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal fade" id="import{{table.name}}" tabindex="-1" role="dialog" aria-labelledby="import{{table.name}}" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <form action="/databases/import" method="post" enctype="multipart/form-data">
+
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" >Import to {{table.name}}</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <input type="hidden" name="table" value="{{table.name}}">
+                                                    <input type="hidden" name="location" value="{{../database.location}}">
+
+                                                    <div class="custom-file">
+                                                        <input type="file" class="custom-file-input" id="file" name="file" required>
+                                                        <label class="custom-file-label" for="file">Choose file</label>
+                                                    </div>
+
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <div class="mx-auto">
+                                                        <button type="submit" class="btn btn-primary">Import</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal fade" id="export{{table.name}}" tabindex="-1" role="dialog" aria-labelledby="export{{table.name}}" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <form action="/databases/export" method="post">
+
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLongTitle">Export {{table.name}}</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                    <input type="hidden" name="table" value="{{table.name}}">
+                                                    <input type="hidden" name="location" value="{{../database.location}}">
+
+                                                    <div class="form-group">
+                                                        <label for="type">Export format:</label>
+                                                        <select name="type" id="type" class="form-control" required onchange="
+                                                                if (this.options[this.selectedIndex].value) {
+                                                                    document.getElementById('exportButton{{table.name}}').innerText = 'Export as ' + this.options[this.selectedIndex].value;
+                                                                }
+                                                                else {
+                                                                    document.getElementById('exportButton{{table.name}}').innerText = 'Export';
+                                                                }
+                                                                ">
+                                                            <option value="">Select an export format from the drop down</option>
+                                                            {{#if ../tsv}}
+                                                                <option value="tsv" selected>TSV</option>
+                                                                <option value="csv">CSV</option>
+                                                            {{else}}
+                                                                {{#if ../csv}}
+                                                                    <option value="tsv">TSV</option>
+                                                                    <option value="csv" selected>CSV</option>
+                                                                {{else}}
+                                                                    <option value="tsv">TSV</option>
+                                                                    <option value="csv">CSV</option>
+                                                                {{/if}}
+                                                            {{/if}}
+                                                        </select>
+                                                    </div>
+
+                                                <a href="/databases/getTable?location={{../database.location}}&table={{table.name}}&fromExport=true">Advanced export</a>
+
+                                            </div>
+                                            <div class="modal-footer">
+                                                <div class="mx-auto">
+                                                    {{#if ../tsv}}
+                                                        <button type="submit" class="btn btn-success" id="exportButton{{table.name}}">Export as tsv</button>
+                                                    {{else}}
+                                                        {{#if ../csv}}
+                                                            <button type="submit" class="btn btn-success" id="exportButton{{table.name}}">Export as csv</button>
+                                                        {{else}}
+                                                            <button type="submit" class="btn btn-success" id="exportButton{{table.name}}">Export</button>
+                                                        {{/if}}
+                                                    {{/if}}
+                                                </div>
+                                            </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal fade" id="clone{{table.name}}" tabindex="-1" role="dialog" aria-labelledby="clone{{table.name}}" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <form action="/databases/cloneTable" method="post">
+
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" >Clone {{table.name}}</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <input type="hidden" name="table" value="{{table.name}}">
+                                                    <input type="hidden" name="location" value="{{../database.location}}">
+
+                                                    <div class="form-group">
+                                                        <label for="name">Name:</label>
+                                                        <input type="text" id="name" name="name" class="form-control" placeholder="Name for the cloned table" required>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <div class="mx-auto">
+                                                        <button type="submit" class="btn btn-warning">Clone {{table.name}}</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal fade" id="delete{{table.name}}" tabindex="-1" role="dialog" aria-labelledby="delete{{table.name}}" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <form action="/databases/deleteTable" method="post">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" >Are you sure you want to delete {{table.name}}?</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                        <input type="hidden" name="table" value="{{table.name}}">
+                                                        <input type="hidden" name="location" value="{{../database.location}}">
+
+                                                <div class="modal-footer d-flex justify-content-between">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                                                    <button type="submit" class="btn btn-danger">Delete {{table.name}}</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+                {{/if}}
+            </div>
+
+            <div class="col">
+                {{#if database.views}}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-sm">
+                            <caption>Views</caption>
+                            <thead class="thead-dark">
+                            <tr>
+                                <th>Name</th>
+                                <th>Records</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{#each database.views as |view|}}
+                                <tr>
+                                    <td>
+                                        <form action="/databases/getView">
+                                            <input type="hidden" name="location" value="{{../database.location}}">
+                                            <input type="hidden" name="view" value="{{view.name}}">
+                                            <a onclick="this.parentElement.submit()" href="#">{{view.name}}</a>
+                                        </form>
+                                    </td>
+                                    <td>{{view.records}}</td>
+                                    <td>
+                                        <button type="submit" class="btn btn-sm btn-success" data-toggle="modal" data-target="#export{{view.name}}">Export</button>
+                                        <form class="d-inline" action="/databases/deleteView" method="post">
+                                            <input type="hidden" name="view" value="{{view.name}}">
+                                            <input type="hidden" name="location" value="{{../database.location}}">
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <div class="modal fade" id="export{{view.name}}" tabindex="-1" role="dialog" aria-labelledby="export{{view.name}}" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <form action="/databases/export" method="get">
+
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="exampleModalLongTitle">Export {{view.name}}</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <input type="hidden" name="table" value="{{view.name}}">
+                                                    <input type="hidden" name="location" value="{{../database.location}}">
+
+                                                    <div class="form-group">
+                                                        <label for="type">Export format:</label>
+                                                        <select name="type" id="type" class="form-control" required onchange="
+                                                                if (this.options[this.selectedIndex].value) {
+                                                                document.getElementById('exportButton{{view.name}}').innerText = 'Export as ' + this.options[this.selectedIndex].value;
+                                                                }
+                                                                else {
+                                                                document.getElementById('exportButton{{view.name}}').innerText = 'Export';
+                                                                }
+                                                                ">
+                                                            <option value="">Select an export format from the drop down</option>
+                                                            <option value="tsv">TSV</option>
+                                                            <option value="csv">CSV</option>
+                                                        </select>
+                                                    </div>
+
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <div class="mx-auto">
+                                                        <button type="submit" class="btn btn-success" id="exportButton{{view.name}}">Export</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+                {{/if}}
+            </div>
+        </div>
+        </div>
+
+
+        {{#if sqlActive}}
+            <div class="tab-pane fade show active" id="sql" aria-labelledby="sql" role="tabpanel">
+        {{else}}
+            <div class="tab-pane fade" id="sql" aria-labelledby="sql" role="tabpanel">
+        {{/if}}
+            <form action="/databases/executeStatement" method="post">
+                <div class="row">
+                    <div class="col-8">
+                        <textarea name="sql" id="sqlInput"  rows="10" placeholder="SQL statement(s) to execute" class="form-control" required>{{query}}</textarea>
+                        <input type="hidden" name="location" value="{{database.location}}">
+                        <div class="text-center mt-1">
+                            <button type="submit" class="btn btn-warning">Execute</button>
+                        </div>
+                    </div>
+                    <div class="col">
+                        Recently executed query's:
+                        <ul>
+                            {{#each querys}}
+                                <li><a href="#" onclick="addQuery(this)">{{this}}</a></li>
+                            {{/each}}
+                        </ul>
+                    </div>
+                </div>
+
+            </form>
+
+            {{#each queryResult}}
+                {{#if this.columns}}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-sm">
+                            <caption>Result for '{{this.query}}'</caption>
+                            <thead class="thead-dark">
+                            <tr>
+                                {{#each this.columns}}
+                                    <th>{{this}}</th>
+                                {{/each}}
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{#each this.rows as |row|}}
+                                <tr>
+                                    {{#each row}}
+                                        <td>{{this}}</td>
+                                    {{/each}}
+                                </tr>
+                            {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+
+                {{else}}
+                    <div class="alert alert-info alert-dismissible fade show" role="alert">
+                        <i>'{{this.query}}'</i>:
+                        {{#if this.result.lastInsertRowid}}
+                            last insert ROWID: <b>{{this.result.lastInsertRowid}}</b>
+                        {{else}}
+                            <b>{{this.result.changes}}</b> rows affected
+                        {{/if}}
+
+
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {{/if}}
+            {{/each}}
+        </div>
+    </div>
+</div>
+
+<script src="/js/generateStatement.js"></script>
+<script src="/js/database.js"></script>
+<!--<script src="/js/autoCompletion.js"></script>-->

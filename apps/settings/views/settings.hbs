@@ -1,0 +1,48 @@
+<nav class="navbar bg-light">
+    <a class="navbar-brand">SQLite Admin</a>
+    <a href="/databases">Back to app</a>
+</nav>
+
+<div class="container mt-2">
+    <h3 class="text-center">Settings</h3>
+
+
+    {{#each errors as |error|}}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{error}}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {{/each}}
+
+    <form action="/settings" method="post" class="p-3 mt-2 shadow bg-light">
+        <div class="form-group">
+            <label for="directory">Directory:</label>
+            <input type="text" id="directory" name="directory" class="form-control" required placeholder="Directory" value="{{directory}}">
+        </div>
+        <div class="form-group">
+            <div class="form-check">
+                {{#if subdirectories}}
+                    <input class="form-check-input" type="checkbox" id="subdirectories" name="subdirectories" checked>
+                {{else}}
+                    <input class="form-check-input" type="checkbox" id="subdirectories" name="subdirectories">
+                {{/if}}
+                <label class="form-check-label" for="subdirectories">
+                    Subdirectories
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="extensions">Extensions:</label>
+            <input type="text" id="extensions" name="extensions" class="form-control" placeholder="Place a comma separated string of extensions" required value="{{extensions}}">
+        </div>
+        <div class="form-group">
+            <label for="type">Export format (preferred):</label>
+            <input type="text" id="type" name="type" class="form-control" placeholder="Export format (csv, tsv)" required value="{{type}}">
+        </div>
+        <div class="text-center">
+            <button type="submit" class="btn btn-success">Save</button>
+        </div>
+    </form>
+</div>

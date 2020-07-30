@@ -1,0 +1,19 @@
+#contextMenu {
+    list-style: none;
+    position: absolute;
+    padding: 3px;
+    margin: 0;
+    background: white;
+}
+
+#contextMenu li {
+    cursor: pointer;
+}
+
+#contextMenu li:hover{
+    background-color: lightgray;
+}
+
+.nullValues {
+    color: rgba(43,43,43,0.73);
+}

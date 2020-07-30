@@ -1,0 +1,6 @@
+.idea/
+node_modules/
+exportFiles/
+importFiles/
+config/config.conf
+config/internalDb.db
