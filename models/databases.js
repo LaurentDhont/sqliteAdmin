@@ -2,7 +2,7 @@ const Database = require('better-sqlite3');
 const path = require('path');
 const internalDb = require('./internalDb');
 
-async function getOne(location) {
+function getOne(location) {
     const db = new Database(location, {
         fileMustExist: true
     });
@@ -42,12 +42,10 @@ async function getOne(location) {
     }
 }
 
-async function getTable(location, table, column, order, filter, quantity, page) {
+function getTable(location, table, column, order, filter, quantity, page) {
     const db = new Database(location, {
         fileMustExist: true
     });
-
-    console.log(location, table);
 
     const columns = db.pragma("table_info(" + table + ")", {simple: false});
 
@@ -57,6 +55,7 @@ async function getTable(location, table, column, order, filter, quantity, page) 
         if (columns[i].pk === 1) {
             pk = columns[i].name
         }
+        columns[i].pk = columns[i].pk === 1;
     }
 
     let sqlGetRows;
@@ -87,12 +86,6 @@ async function getTable(location, table, column, order, filter, quantity, page) 
     }
 
     let rows = sqlGetRows.all();
-
-    if (pk) {
-        for (let i = 0; i < rows.length; i++) {
-            delete rows[i][pk];
-        }
-    }
 
     let realRows = [];
 
@@ -129,7 +122,7 @@ async function getTable(location, table, column, order, filter, quantity, page) 
     }
 }
 
-async function getView(location, view, column, order, filter, quantity, page) {
+function getView(location, view, column, order, filter, quantity, page) {
     const db = new Database(location, {
         fileMustExist: true
     });
@@ -176,18 +169,39 @@ async function getView(location, view, column, order, filter, quantity, page) {
     }
 }
 
-async function deleteRow(location, table, rowId) {
+function deleteRow(location, table, rowId) {
     const db = new Database(location, {
         fileMustExist: true
     });
 
-    const sqlDeleteRow = db.prepare("DELETE FROM " + table + " WHERE ROWID = ?");
+    const columns = db.pragma("table_info(" + table + ")", {simple: false});
+
+    let pk;
+
+    for (let i = 0; i < columns.length; i++) {
+        if (columns[i].pk === 1) {
+            pk = columns[i].name
+        }
+    }
+
+    let sql = "DELETE FROM " + table + " WHERE ";
+
+    if (pk) {
+        sql += pk
+    }
+    else {
+        sql += "ROWID"
+    }
+
+    sql += " = ?";
+
+    const sqlDeleteRow = db.prepare(sql);
     sqlDeleteRow.run(rowId);
 
     db.close();
 }
 
-async function deleteTable(location, table) {
+function deleteTable(location, table) {
     const db = new Database(location, {
         fileMustExist: true
     });
@@ -198,7 +212,7 @@ async function deleteTable(location, table) {
     db.close();
 }
 
-async function deleteView(location, view) {
+function deleteView(location, view) {
     const db = new Database(location, {
         fileMustExist: true
     });
@@ -209,7 +223,7 @@ async function deleteView(location, view) {
     db.close();
 }
 
-async function executeStatement(location, sql) {
+function executeStatement(location, sql) {
     const db = new Database(location, {
         fileMustExist: true
     });
@@ -262,7 +276,7 @@ async function executeStatement(location, sql) {
     return results;
 }
 
-async function getColumns(location, table) {
+function getColumns(location, table) {
     const db = new Database(location, {
         fileMustExist: true
     });
@@ -274,7 +288,7 @@ async function getColumns(location, table) {
 
 const csv = require('fast-csv');
 
-async function exportTable (location, table, type, columnsToExport, columnNames, whereClause) {
+function exportTable (location, table, type, columnsToExport, columnNames, whereClause) {
     const db = new Database(location, {
         fileMustExist: true
     });
@@ -336,23 +350,44 @@ async function exportTable (location, table, type, columnsToExport, columnNames,
             });
     });
 
-
-
 }
 
-async function updateRow(location, table, column, ROWID, value) {
+function updateRow(location, table, column, ROWID, value) {
     const db = new Database(location, {
         fileMustExist: true
     });
 
-    const sqlUpdate = db.prepare("UPDATE " + table + " SET " + column + " = ? WHERE ROWID = ?");
+    const columns = db.pragma("table_info(" + table + ")", {simple: false});
+
+    let pk;
+
+    for (let i = 0; i < columns.length; i++) {
+        if (columns[i].pk === 1) {
+            pk = columns[i].name
+        }
+    }
+
+    console.log(column);
+
+    let sql = "UPDATE " + table + " SET " + column + " = ? WHERE ";
+
+    if (pk) {
+        sql += pk;
+    }
+    else {
+        sql += "ROWID";
+    }
+
+    sql += " = ?";
+
+    const sqlUpdate = db.prepare(sql);
     const result = sqlUpdate.run(value, ROWID);
 
     db.close();
     return result;
 }
 
-async function vacuum(location) {
+function vacuum(location) {
     const db = new Database(location, {
         fileMustExist: true
     });
@@ -362,7 +397,7 @@ async function vacuum(location) {
     db.close();
 }
 
-async function vacuumTable(location, table) {
+function vacuumTable(location, table) {
     const db = new Database(location, {
         fileMustExist: true
     });
@@ -372,7 +407,7 @@ async function vacuumTable(location, table) {
     db.close();
 }
 
-async function importTable(location, table, filePath, type) {
+function importTable(location, table, filePath, type) {
     const db = new Database(location, {
         fileMustExist: true
     });
@@ -436,16 +471,9 @@ async function importTable(location, table, filePath, type) {
                 resolve(rowcount);
             });
     });
-
-
-
-
-
-    // const sql = "INSERT INTO " + table;
-
 }
 
-async function cloneTable(location, table, name) {
+function cloneTable(location, table, name) {
     const db = new Database(location, {
         fileMustExist: true
     });

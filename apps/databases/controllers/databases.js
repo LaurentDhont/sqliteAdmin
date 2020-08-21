@@ -39,7 +39,7 @@ exports.getDatabase = async (req, res) => {
     options.sqlActive = active === "sql";
 
     try {
-        options.database = await databases.getOne(location);
+        options.database = databases.getOne(location);
     }
     catch (e) {
         console.error(e);
@@ -70,11 +70,11 @@ exports.getDatabase = async (req, res) => {
     res.render('database', options);
 };
 
-exports.generateStatement = async (req, res) => {
+exports.generateStatement = (req, res) => {
     const {location, table: tableName, type, where} = req.query;
-    console.log(where);
+
     try {
-        const columns = await databases.getColumns(location, tableName);
+        const columns = databases.getColumns(location, tableName);
 
         let statement;
         if (type === "select") {
@@ -136,7 +136,7 @@ exports.generateStatement = async (req, res) => {
     }
 };
 
-exports.getTable = async (req, res) => {
+exports.getTable = (req, res) => {
     let options = {
         errors: req.session.errors,
         fromExport: req.query.fromExport,
@@ -187,7 +187,7 @@ exports.getTable = async (req, res) => {
 
         req.session.quantity = quantity;
 
-        options.database = await databases.getOne(location);
+        options.database = databases.getOne(location);
 
         for (let i = 0; i < options.database.tables.length; i++) {
             if (options.database.tables[i].name === table) {
@@ -207,10 +207,9 @@ exports.getTable = async (req, res) => {
             options.previousPage = parseInt(page) - 1;
         }
 
-        options.table = await databases.getTable(location, table, column, order, filter, quantity, page);
+        options.table = databases.getTable(location, table, column, order, filter, quantity, page);
 
         if (column && order) {
-            console.log("column order");
             if (column === "ROWID") {
                 options.selected = true;
                 options.ASC = order === "ASC";
@@ -234,7 +233,7 @@ exports.getTable = async (req, res) => {
     res.render('table', options);
 };
 
-exports.getView = async (req, res) => {
+exports.getView =  (req, res) => {
     let options = {
         errors: req.session.errors
     };
@@ -282,7 +281,7 @@ exports.getView = async (req, res) => {
 
         req.session.quantity = quantity;
 
-        options.database = await databases.getOne(location);
+        options.database = databases.getOne(location);
 
         for (let i = 0; i < options.database.views.length; i++) {
             if (options.database.views[i].name === view) {
@@ -304,7 +303,7 @@ exports.getView = async (req, res) => {
             options.previousPage = parseInt(page) - 1;
         }
 
-        options.view = await databases.getView(location, view, column, order, filter, quantity, page);
+        options.view = databases.getView(location, view, column, order, filter, quantity, page);
 
         if (column && order) {
             if (column === "ROWID") {
@@ -327,11 +326,11 @@ exports.getView = async (req, res) => {
     res.render('view', options);
 };
 
-exports.deleteRow = async (req, res) => {
+exports.deleteRow =  (req, res) => {
     const {rowId, location, table} = req.body;
 
     try {
-        await databases.deleteRow(location, table, rowId);
+        databases.deleteRow(location, table, rowId);
     }
     catch (e) {
         console.error(e);
@@ -341,11 +340,11 @@ exports.deleteRow = async (req, res) => {
     res.redirect('/databases/getTable?location=' + location + "&table=" + table);
 };
 
-exports.deleteTable = async (req, res) => {
+exports.deleteTable =  (req, res) => {
     const {location, table} = req.body;
 
     try {
-        await databases.deleteTable(location, table);
+        databases.deleteTable(location, table);
     }
     catch (e) {
         console.error(e);
@@ -355,11 +354,11 @@ exports.deleteTable = async (req, res) => {
     res.redirect('/databases/getDatabase?location=' + location);
 };
 
-exports.deleteView = async (req, res) => {
+exports.deleteView =  (req, res) => {
     const {location, view} = req.body;
 
     try {
-        await databases.deleteView(location, view);
+        databases.deleteView(location, view);
     }
     catch (e) {
         console.error(e);
@@ -369,14 +368,14 @@ exports.deleteView = async (req, res) => {
     res.redirect('/databases/getDatabase?location=' + location);
 };
 
-exports.executeStatement = async (req, res) => {
+exports.executeStatement =  (req, res) => {
     let {location, sql} = req.body;
 
     sql = sql.trim();
     req.session.query = sql;
 
     try {
-        req.session.queryResult = await databases.executeStatement(location, sql);
+        req.session.queryResult = databases.executeStatement(location, sql);
     }
     catch (e) {
         console.error(e);
@@ -386,7 +385,7 @@ exports.executeStatement = async (req, res) => {
     res.redirect('/databases/getDatabase?location=' + location + "&active=sql");
 };
 
-exports.executeStatements = async (req, res) => {
+exports.executeStatements =  (req, res) => {
     let {dbs, names, sql} = req.body;
 
     sql = sql.trim();
@@ -395,7 +394,7 @@ exports.executeStatements = async (req, res) => {
         let results = [];
         for (let i = 0; i < dbs.length; i++) {
             try {
-                results.push(await databases.executeStatement(dbs[i], sql));
+                results.push(databases.executeStatement(dbs[i], sql));
             }
             catch (e) {
                 console.error(e);
@@ -415,8 +414,6 @@ exports.executeStatements = async (req, res) => {
 exports.download = (req, res) => {
     let {location} = req.query;
 
-    console.log(location);
-
     try {
         res.download(location);
     }
@@ -425,14 +422,11 @@ exports.download = (req, res) => {
     }
 };
 
-exports.export = async (req, res) => {
+exports.export =  (req, res) => {
     const {location, table, type, columns, columnNames, whereClause} = req.body;
 
-    console.log(columns);
-    console.log(columnNames);
-
     try {
-        const file = await databases.export(location, table, type, columns, columnNames, whereClause);
+        const file = databases.export(location, table, type, columns, columnNames, whereClause);
         console.log(file);
         res.download(file, table + "." + type);
     }
@@ -450,12 +444,11 @@ exports.export = async (req, res) => {
     }
 };
 
-exports.updateRow = async (req, res) => {
+exports.updateRow =  (req, res) => {
     const {location, table, column, ROWID, value} = req.body;
 
     try {
-        const result = await databases.updateRow(location, table, column, ROWID, value);
-        console.log(result);
+        const result = databases.updateRow(location, table, column, ROWID, value);
         res.sendStatus(200);
     }
     catch (e) {
@@ -464,11 +457,11 @@ exports.updateRow = async (req, res) => {
     }
 };
 
-exports.vacuum = async (req, res) => {
+exports.vacuum =  (req, res) => {
     const {location} = req.body;
 
     try {
-        await databases.vacuum(location);
+        databases.vacuum(location);
     }
     catch (e) {
         console.error(e);
@@ -478,11 +471,11 @@ exports.vacuum = async (req, res) => {
     res.redirect('/databases');
 };
 
-exports.cloneTable = async (req, res) => {
+exports.cloneTable =  (req, res) => {
     const {location, table, name} = req.body;
 
     try {
-        await databases.cloneTable(location, table, name);
+        databases.cloneTable(location, table, name);
     }
     catch (e) {
         console.error(e);
@@ -519,8 +512,8 @@ const upload = multer({
     fileFilter: fileFilter
 }).single('file');
 
-exports.import = async (req, res) => {
-    upload(req, res, async (err) => {
+exports.import =  (req, res) => {
+    upload(req, res,  (err) => {
         const {location, table} = req.body;
 
         if (err) {
@@ -538,7 +531,7 @@ exports.import = async (req, res) => {
                 type = "tsv";
             }
             try {
-                await databases.import(location, table, file.path, type);
+                databases.import(location, table, file.path, type);
             }
             catch (e) {
                 console.error(e);

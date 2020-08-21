@@ -108,7 +108,6 @@ async function updateRow(column, ROWID, value, cell, wasNull) {
         }
         else {
             const text = await response.text();
-            console.log(text);
             cell.style.animationDuration = "2s";
             if (isGrey) {
                 cell.style.animationName = "errorGrey";
@@ -227,7 +226,7 @@ setNull.addEventListener("click", async (evt) => {
         const column = selectedCell.getAttribute("column");
 
         if (originalValue !== value) {
-            await updateRow(column, ROWID, value, selectedCell, );
+            await updateRow(column, ROWID, value, selectedCell);
         }
     }
 });
