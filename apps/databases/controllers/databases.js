@@ -349,7 +349,7 @@ exports.deleteRow =  (req, res) => {
         req.session.errors.push(e.message);
     }
 
-    res.redirect('/databases/getTable?location=' + location + "&table=" + table);
+    res.redirect('/databases/getTable?location=' + encodeURIComponent(location) + "&table=" + table);
 };
 
 exports.deleteTable =  (req, res) => {
@@ -364,7 +364,7 @@ exports.deleteTable =  (req, res) => {
         req.session.errors.push(e.message);
     }
 
-    res.redirect('/databases/getDatabase?location=' + location);
+    res.redirect('/databases/getDatabase?location=' + encodeURIComponent(location));
 };
 
 exports.deleteView =  (req, res) => {
@@ -379,7 +379,7 @@ exports.deleteView =  (req, res) => {
         req.session.errors.push(e.message);
     }
 
-    res.redirect('/databases/getDatabase?location=' + location);
+    res.redirect('/databases/getDatabase?location=' + encodeURIComponent(location));
 };
 
 exports.executeStatement =  (req, res) => {
@@ -397,7 +397,7 @@ exports.executeStatement =  (req, res) => {
         req.session.errors.push(e.message);
     }
 
-    res.redirect('/databases/getDatabase?location=' + location + "&active=sql");
+    res.redirect('/databases/getDatabase?location=' + encodeURIComponent(location) + "&active=sql");
 };
 
 exports.executeStatements =  (req, res) => {
@@ -452,10 +452,10 @@ exports.export =  (req, res) => {
 
         if (columns) {
             req.session.whereClause = whereClause;
-            res.redirect('/databases/getTable?location='+location + "&table=" + table + "&fromExport=true");
+            res.redirect('/databases/getTable?location='+encodeURIComponent(location) + "&table=" + table + "&fromExport=true");
         }
         else {
-            res.redirect('/databases/getDatabase?location=' + location);
+            res.redirect('/databases/getDatabase?location=' + encodeURIComponent(location));
         }
     }
 };
@@ -499,7 +499,7 @@ exports.cloneTable =  (req, res) => {
         console.error(e);
         req.session.errors.push(e.message);
     }
-    res.redirect('/databases/getDatabase?location=' + location);
+    res.redirect('/databases/getDatabase?location=' + encodeURIComponent(location));
 };
 
 const path = require('path');
@@ -558,6 +558,6 @@ exports.import =  (req, res) => {
             }
         }
 
-        res.redirect('/databases/getDatabase?location=' + location);
+        res.redirect('/databases/getDatabase?location=' + encodeURIComponent(location));
     });
 };
