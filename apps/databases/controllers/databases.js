@@ -339,7 +339,7 @@ exports.getView =  (req, res) => {
 
 exports.deleteRow =  (req, res) => {
     const {rowId, table} = req.body;
-    const location = decodeURIComponent(req.query.location);
+    const location = decodeURIComponent(req.body.location);
 
     try {
         databases.deleteRow(location, table, rowId);
@@ -354,7 +354,7 @@ exports.deleteRow =  (req, res) => {
 
 exports.deleteTable =  (req, res) => {
     const {table} = req.body;
-    const location = decodeURIComponent(req.query.location);
+    const location = decodeURIComponent(req.body.location);
 
     try {
         databases.deleteTable(location, table);
@@ -369,7 +369,7 @@ exports.deleteTable =  (req, res) => {
 
 exports.deleteView =  (req, res) => {
     const {view} = req.body;
-    const location = decodeURIComponent(req.query.location);
+    const location = decodeURIComponent(req.body.location);
 
     try {
         databases.deleteView(location, view);
@@ -384,7 +384,7 @@ exports.deleteView =  (req, res) => {
 
 exports.executeStatement =  (req, res) => {
     let {sql} = req.body;
-    const location = decodeURIComponent(req.query.location);
+    const location = decodeURIComponent(req.body.location);
 
     sql = sql.trim();
     req.session.query = sql;
@@ -439,7 +439,7 @@ exports.download = (req, res) => {
 
 exports.export =  (req, res) => {
     const {table, type, columns, columnNames, whereClause} = req.body;
-    const location = decodeURIComponent(req.query.location);
+    const location = decodeURIComponent(req.body.location);
 
     try {
         const file = databases.export(location, table, type, columns, columnNames, whereClause);
@@ -462,7 +462,7 @@ exports.export =  (req, res) => {
 
 exports.updateRow =  (req, res) => {
     const {table, column, ROWID, value} = req.body;
-    const location = decodeURIComponent(req.query.location);
+    const location = decodeURIComponent(req.body.location);
 
     try {
         const result = databases.updateRow(location, table, column, ROWID, value);
@@ -475,7 +475,7 @@ exports.updateRow =  (req, res) => {
 };
 
 exports.vacuum =  (req, res) => {
-    const location = decodeURIComponent(req.query.location);
+    const location = decodeURIComponent(req.body.location);
 
     try {
         databases.vacuum(location);
@@ -490,7 +490,7 @@ exports.vacuum =  (req, res) => {
 
 exports.cloneTable =  (req, res) => {
     const {table, name} = req.body;
-    const location = decodeURIComponent(req.query.location);
+    const location = decodeURIComponent(req.body.location);
 
     try {
         databases.cloneTable(location, table, name);
@@ -532,7 +532,8 @@ const upload = multer({
 
 exports.import =  (req, res) => {
     upload(req, res,  (err) => {
-        const {location, table} = req.body;
+        const {table} = req.body;
+        const location = decodeURIComponent(req.body.location);
 
         if (err) {
             req.session.errors.push(err.message);
