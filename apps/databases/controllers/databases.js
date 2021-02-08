@@ -38,6 +38,7 @@ exports.getDatabase = async (req, res) => {
 
     options.sqlActive = active === "sql";
 
+    console.log(location);
     try {
         options.database = databases.getOne(location);
     }
