@@ -150,6 +150,7 @@ exports.getTable = (req, res) => {
     req.session.errors = [];
 
     const {location, table, column, order, filter} = req.query;
+    console.log(location);
     let {quantity, page} = req.query;
 
     options.column = column;
