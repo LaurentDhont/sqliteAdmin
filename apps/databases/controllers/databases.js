@@ -42,6 +42,7 @@ exports.getDatabase = async (req, res) => {
 
     try {
         options.database = databases.getOne(location);
+        options.database.location = encodeURIComponent(options.database.location);
     }
     catch (e) {
         console.error(e);
@@ -190,6 +191,7 @@ exports.getTable = (req, res) => {
         req.session.quantity = quantity;
 
         options.database = databases.getOne(location);
+        options.database.location = encodeURIComponent(options.database.location);
 
         for (let i = 0; i < options.database.tables.length; i++) {
             if (options.database.tables[i].name === table) {
@@ -284,6 +286,7 @@ exports.getView =  (req, res) => {
         req.session.quantity = quantity;
 
         options.database = databases.getOne(location);
+        options.database.location = encodeURIComponent(options.database.location);
 
         for (let i = 0; i < options.database.views.length; i++) {
             if (options.database.views[i].name === view) {
