@@ -34,7 +34,8 @@ exports.getDatabase = async (req, res) => {
     req.session.queryResult = null;
     req.session.errors = [];
 
-    const {location, active} = req.query;
+    const {active} = req.query;
+    const location = decodeURIComponent(req.query.location);
 
     options.sqlActive = active === "sql";
 
@@ -74,7 +75,8 @@ exports.getDatabase = async (req, res) => {
 };
 
 exports.generateStatement = (req, res) => {
-    const {location, table: tableName, type, where} = req.query;
+    const {table: tableName, type, where} = req.query;
+    const location = decodeURIComponent(req.query.location);
 
     try {
         const columns = databases.getColumns(location, tableName);
@@ -149,8 +151,9 @@ exports.getTable = (req, res) => {
     req.session.whereClause = null;
     req.session.errors = [];
 
-    const {location, table, column, order, filter} = req.query;
-    console.log(location);
+    const {table, column, order, filter} = req.query;
+    const location = decodeURIComponent(req.query.location);
+
     let {quantity, page} = req.query;
 
     options.column = column;
@@ -245,7 +248,9 @@ exports.getView =  (req, res) => {
 
     req.session.errors = [];
 
-    const {location, view, column, order, filter} = req.query;
+    const {view, column, order, filter} = req.query;
+    const location = decodeURIComponent(req.query.location);
+
     let {quantity, page} = req.query;
 
     options.column = column;
@@ -333,7 +338,8 @@ exports.getView =  (req, res) => {
 };
 
 exports.deleteRow =  (req, res) => {
-    const {rowId, location, table} = req.body;
+    const {rowId, table} = req.body;
+    const location = decodeURIComponent(req.query.location);
 
     try {
         databases.deleteRow(location, table, rowId);
@@ -347,7 +353,8 @@ exports.deleteRow =  (req, res) => {
 };
 
 exports.deleteTable =  (req, res) => {
-    const {location, table} = req.body;
+    const {table} = req.body;
+    const location = decodeURIComponent(req.query.location);
 
     try {
         databases.deleteTable(location, table);
@@ -361,7 +368,8 @@ exports.deleteTable =  (req, res) => {
 };
 
 exports.deleteView =  (req, res) => {
-    const {location, view} = req.body;
+    const {view} = req.body;
+    const location = decodeURIComponent(req.query.location);
 
     try {
         databases.deleteView(location, view);
@@ -375,7 +383,8 @@ exports.deleteView =  (req, res) => {
 };
 
 exports.executeStatement =  (req, res) => {
-    let {location, sql} = req.body;
+    let {sql} = req.body;
+    const location = decodeURIComponent(req.query.location);
 
     sql = sql.trim();
     req.session.query = sql;
@@ -418,7 +427,7 @@ exports.executeStatements =  (req, res) => {
 };
 
 exports.download = (req, res) => {
-    let {location} = req.query;
+    const location = decodeURIComponent(req.query.location);
 
     try {
         res.download(location);
@@ -429,7 +438,8 @@ exports.download = (req, res) => {
 };
 
 exports.export =  (req, res) => {
-    const {location, table, type, columns, columnNames, whereClause} = req.body;
+    const {table, type, columns, columnNames, whereClause} = req.body;
+    const location = decodeURIComponent(req.query.location);
 
     try {
         const file = databases.export(location, table, type, columns, columnNames, whereClause);
@@ -451,7 +461,8 @@ exports.export =  (req, res) => {
 };
 
 exports.updateRow =  (req, res) => {
-    const {location, table, column, ROWID, value} = req.body;
+    const {table, column, ROWID, value} = req.body;
+    const location = decodeURIComponent(req.query.location);
 
     try {
         const result = databases.updateRow(location, table, column, ROWID, value);
@@ -464,7 +475,7 @@ exports.updateRow =  (req, res) => {
 };
 
 exports.vacuum =  (req, res) => {
-    const {location} = req.body;
+    const location = decodeURIComponent(req.query.location);
 
     try {
         databases.vacuum(location);
@@ -478,7 +489,8 @@ exports.vacuum =  (req, res) => {
 };
 
 exports.cloneTable =  (req, res) => {
-    const {location, table, name} = req.body;
+    const {table, name} = req.body;
+    const location = decodeURIComponent(req.query.location);
 
     try {
         databases.cloneTable(location, table, name);
