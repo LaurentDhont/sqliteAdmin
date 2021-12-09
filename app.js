@@ -8,7 +8,8 @@ const app = express();
 
 app.use(express.urlencoded({
     extended: true,
-    parameterLimit: 10000
+    parameterLimit: 10000,
+    limit: '1000mb'
 }));
 
 app.use(express.json());
