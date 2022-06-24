@@ -13,7 +13,7 @@
     "nodemon": "^2.0.4"
   },
   "dependencies": {
-    "better-sqlite3": "^5.4.3",
+    "better-sqlite3": "^7.5.3",
     "csv": "^5.3.2",
     "express": "^4.17.1",
     "express-handlebars": "^3.1.0",
