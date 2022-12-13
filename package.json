@@ -15,7 +15,7 @@
   "dependencies": {
     "better-sqlite3": "^7.5.3",
     "csv": "^5.3.2",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "express-handlebars": "^3.1.0",
     "express-session": "^1.17.1",
     "fast-csv": "^3.7.0",
