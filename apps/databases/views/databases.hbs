@@ -3,8 +3,6 @@
     <a href="/settings"><i class="fas fa-cog fa-2x float-right"></i></a>
 </nav>
 
-
-
 <div class="container-fluid mt-2">
     <h3 class="text-center">Databases</h3>
 
@@ -17,119 +15,9 @@
         </div>
     {{/each}}
 
-    <input type="text" class="form-control float-left mb-1" id="searchInput" placeholder="Search database name" autofocus>
+    <div id="container">
 
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <caption>Databases</caption>
-            <thead class="thead-dark">
-            <tr>
-                <th>Name</th>
-                <th>Directory</th>
-                <th>Last modified</th>
-                <th>Size (kB)</th>
-                <th>Actions</th>
-                <th><input type="checkbox" id="selectAll"></th>
-            </tr>
-            </thead>
-            <tbody id="tbody">
-            {{#each databases as |database|}}
-                <tr>
-                    <td>
-                        <form action="/databases/getDatabase">
-                            <input type="hidden" name="location" value="{{database.location}}">
-                            <a onclick="this.parentElement.submit()" href="#">{{database.name}}</a>
-                        </form>
-                    </td>
-                    <td>{{database.directory}}</td>
-                    <td>{{database.lastModified}}</td>
-                    <td>{{database.size}}</td>
-                    <td>
-                        <form class="d-inline" action="/databases/download" method="get">
-                            <input type="hidden" name="location" value="{{database.location}}">
-                            <button type="submit" class="btn btn-sm btn-success">Download</button>
-                        </form>
-                        <form class="d-inline" action="/databases/vacuum" method="post">
-                            <input type="hidden" name="location" value="{{database.location}}">
-                            <button type="submit" class="btn btn-sm btn-primary">Vacuum</button>
-                        </form>
-                    </td>
-                    <th>
-                        <input type="checkbox" class="selectCheckBoxes" form="executeForm" name="dbs" value="{{database.location}}">
-                        <input hidden type="checkbox" class="selectCheckBoxes" form="executeForm" name="names" value="{{database.name}}">
-                    </th>
-                </tr>
-            {{/each}}
-            </tbody>
-        </table>
     </div>
 
-    <div class="text-right mt-1">
-        <button type="submit" class="btn btn-warning" data-toggle="modal" data-target="#executeModal">Execute queries for all selected dbs</button>
-    </div>
-
-    <!-- Button trigger modal -->
-
-
-    <!-- Modal -->
-    <div class="modal fade" id="executeModal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
-        <div class="modal-dialog " role="document">
-            <form action="/databases/executeStatements" method="post" id="executeForm">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalTitle">Execute queries</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label for="sqlInput">SQL statement('s)</label>
-                            <textarea name="sql" id="sqlInput"  rows="10" placeholder="SQL statement('s) to execute" class="form-control" required></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Execute</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
+    <script src="/react/viewDatabases.js"></script>
 </div>
-
-<script>
-    const searchInput = document.getElementById("searchInput");
-
-    searchInput.addEventListener("input", (evt) => {
-        const searchValue = evt.target.value;
-
-        const rows = document.getElementById("tbody").rows;
-        for (let i = 0; i < rows.length; i++) {
-            const dbName = rows[i].firstElementChild.innerText;
-            const regex = new RegExp(searchValue);
-            if (regex.test(dbName)) {
-                rows[i].classList.remove("d-none");
-            }
-            else {
-                rows[i].classList.add("d-none");
-            }
-        }
-
-        for (let i = 0; i < selectCheckBoxes.length; i++) {
-            selectCheckBoxes[i].checked = false;
-        }
-        selectAll.checked = false;
-    });
-
-    const selectAll = document.getElementById("selectAll");
-    const selectCheckBoxes = document.getElementsByClassName("selectCheckBoxes");
-    selectAll.addEventListener("click", (evt) => {
-        for (let i = 0; i < selectCheckBoxes.length; i++) {
-            if (!selectCheckBoxes[i].parentElement.parentElement.classList.contains("d-none")){
-                selectCheckBoxes[i].checked = selectAll.checked;
-            }
-        }
-    });
-</script>

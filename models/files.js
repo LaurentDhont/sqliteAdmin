@@ -6,11 +6,14 @@ const formatters = require('../util/formatters');
 
 const config = require('./config');
 
-async function crawl(directory, subDirectories, extensions, filesArray) {
+async function crawl(directory, subDirectories, extensions, search, signal, eventEmitter) {
     const dirs = await fsPromises.readdir(directory, {
         withFileTypes: true
     });
 
+    if (signal.aborted) {
+        return;
+    }
 
     for (let i = 0; i < dirs.length; i++) {
         const currentDir = dirs[i];
@@ -19,13 +22,36 @@ async function crawl(directory, subDirectories, extensions, filesArray) {
 
         if (subDirectories) {
             if (currentDir.isDirectory()) {
-                await crawl(newPath, subDirectories, extensions, filesArray);
-            }
-            else {
+                await crawl(newPath, subDirectories, extensions, search, signal, eventEmitter);
+            } else {
                 const splitFileName = currentDir.name.split('.');
                 if (extensions.includes(splitFileName[splitFileName.length - 1])) {
                     const stat = await fsPromises.stat(newPath);
-                    filesArray.push({
+                    if (signal.aborted) {
+                        return;
+                    }
+
+                    if ((search && currentDir.name.includes(search)) || !search) {
+                        eventEmitter.emit('file', {
+                            name: currentDir.name,
+                            directory: directory,
+                            size: Math.floor(stat.size / 10) / 100,
+                            lastModified: formatters.formatDate(stat.mtime),
+                            location: newPath
+                        });
+                    }
+                }
+            }
+        } else if (currentDir.isFile()) {
+            const splitFileName = currentDir.name.split('.');
+            if (extensions.includes(splitFileName[splitFileName.length - 1])) {
+                const stat = await fsPromises.stat(newPath);
+                if (signal.aborted) {
+                    return;
+                }
+
+                if ((search && currentDir.name.includes(search)) || !search) {
+                    eventEmitter.emit('file', {
                         name: currentDir.name,
                         directory: directory,
                         size: Math.floor(stat.size / 10) / 100,
@@ -35,35 +61,24 @@ async function crawl(directory, subDirectories, extensions, filesArray) {
                 }
             }
         }
-
-        else if (currentDir.isFile()) {
-            const splitFileName = currentDir.name.split('.');
-            if (extensions.includes(splitFileName[splitFileName.length - 1])) {
-                const stat = await fsPromises.stat(newPath);
-                filesArray.push({
-                    name: currentDir.name,
-                    directory: directory,
-                    size: Math.floor(stat.size / 10) / 100,
-                    lastModified: formatters.formatDate(stat.mtime),
-                    location: newPath
-                });
-            }
-        }
     }
-
-    return filesArray;
 }
 
-async function getAll () {
+const events = require('events');
+
+async function getAllEvents(search, signal) {
+    const myEmitter = new events.EventEmitter();
     const directory = await config.getDirectory();
     const extensions = await config.getExtensions();
-    let subDirectories = await config.getSubDirectories();
+    const subDirectories = (await config.getSubDirectories()) === "true";
 
-    subDirectories = subDirectories === "true";
+    crawl(directory, subDirectories, extensions, search, signal, myEmitter).then(() => {
+        myEmitter.emit('finished');
+    }).catch(e => {
+        myEmitter.emit('error', e);
+    });
 
-    let filesArray = [];
-    await crawl(directory, subDirectories, extensions, filesArray);
-    return filesArray;
+    return myEmitter;
 }
 
-exports.getAll = getAll;
+exports.getAllEvents = getAllEvents;

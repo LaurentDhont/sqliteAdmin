@@ -14,7 +14,7 @@ exports.getAll = async (req, res) => {
     req.session.errors = [];
 
     try {
-        options.databases = await files.getAll();
+        // options.databases = await files.getAll(); because now it's done in React and with a REST-API
     }
     catch (e) {
         console.error(e);

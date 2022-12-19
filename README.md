@@ -29,6 +29,7 @@ Web application to view/modify sqlite databases on a server or locally.
 1. git clone https://github.com/LaurentDhont/sqliteAdmin.git
 2. cd sqliteAdmin
 3. npm install
-4. npm start
+4. npm run build
+5. npm start
 
 **Default password: passwordForSqliteAdmin**: this can be changed in the sqliteAdmin/config/config.conf file

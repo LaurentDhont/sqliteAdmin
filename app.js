@@ -59,9 +59,11 @@ app.use('/login', noAuthentication, loginRouter);
 
 const databasesApp = require('./apps/databases/app');
 const settingsApp = require('./apps/settings/app');
+const apiApp = require('./apps/api/app');
 
 app.use('/databases', authentication, databasesApp);
 app.use('/settings', authentication, settingsApp);
+app.use('/api', authentication, apiApp);
 
 app.use((req, res, next) => {
     if (req.session.authorized) {
