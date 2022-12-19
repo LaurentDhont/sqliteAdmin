@@ -437,12 +437,12 @@ exports.download = (req, res) => {
     }
 };
 
-exports.export =  (req, res) => {
+exports.export =  async (req, res) => {
     const {table, type, columns, columnNames, whereClause} = req.body;
     const location = decodeURIComponent(req.body.location);
 
     try {
-        const file = databases.export(location, table, type, columns, columnNames, whereClause);
+        const file = await databases.export(location, table, type, columns, columnNames, whereClause);
         console.log(file);
         res.download(file, table + "." + type);
     }
@@ -531,7 +531,7 @@ const upload = multer({
 }).single('file');
 
 exports.import =  (req, res) => {
-    upload(req, res,  (err) => {
+    upload(req, res,  async (err) => {
         const {table} = req.body;
         const location = decodeURIComponent(req.body.location);
 
@@ -550,7 +550,7 @@ exports.import =  (req, res) => {
                 type = "tsv";
             }
             try {
-                databases.import(location, table, file.path, type);
+                await databases.import(location, table, file.path, type);
             }
             catch (e) {
                 console.error(e);

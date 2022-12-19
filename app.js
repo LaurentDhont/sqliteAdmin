@@ -1,5 +1,5 @@
 const express = require('express');
-const handlebars = require('express-handlebars');
+const {engine} = require('express-handlebars');
 const session = require('express-session');
 
 const path = require('path');
@@ -21,7 +21,7 @@ app.use(session({
     name: "SQLite-Admin"
 }));
 
-app.engine('hbs', handlebars({
+app.engine('hbs', engine({
     layoutsDir: path.join(__dirname, "views/layouts"),
     defaultLayout: "layout",
     extname: ".hbs",

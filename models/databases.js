@@ -445,21 +445,17 @@ function importTable(location, table, filePath, type) {
                         else {
                             sql+="?,";
                         }
-                        console.log(i);
                     }
 
-                    console.log(sql);
                     sql = db.prepare(sql);
                     columnsSet = true;
                 }
-                else {
-                    row = Object.values(row);
-                    try {
-                        sql.run(row);
-                    }
-                    catch (e) {
-                        console.log(e);
-                    }
+                row = Object.values(row);
+                try {
+                    sql.run(row);
+                }
+                catch (e) {
+                    console.log(e);
                 }
             })
             .on('error', (err) => {
