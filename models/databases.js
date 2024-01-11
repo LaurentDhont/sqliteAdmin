@@ -1,4 +1,4 @@
-const Database = require('better-sqlite3');
+const Database = require('better-sqlite3-default-extensions-helper')(require('better-sqlite3'));
 const path = require('path');
 const internalDb = require('./internalDb');
 
