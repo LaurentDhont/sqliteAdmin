@@ -369,7 +369,7 @@ function updateRow(location, table, column, ROWID, value) {
 
     console.log(column);
 
-    let sql = "UPDATE " + table + " SET " + column + " = ? WHERE ";
+    let sql = "UPDATE " + table + " SET [" + column + "] = ? WHERE ";
 
     if (pk) {
         sql += pk;
