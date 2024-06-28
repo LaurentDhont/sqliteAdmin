@@ -64,10 +64,10 @@ function getTable(location, table, column, order, filter, quantity, page) {
 
     if (pk) {
         if (column && order) {
-            sqlGetRows = db.prepare("SELECT " + pk + " AS ROWID, * FROM " + table + " ORDER BY " + column + " " + order + " LIMIT " + page + ", " + quantity);
+            sqlGetRows = db.prepare("SELECT " + pk + " AS ROWID, * FROM " + table + " ORDER BY [" + column + "] " + order + " LIMIT " + page + ", " + quantity);
         }
         else if (column && filter) {
-            sqlGetRows = db.prepare("SELECT " + pk + " AS ROWID, * FROM " + table + " WHERE " + column + " LIKE '%" + filter + "%' LIMIT " + page + ", " + quantity);
+            sqlGetRows = db.prepare("SELECT " + pk + " AS ROWID, * FROM " + table + " WHERE [" + column + "] LIKE '%" + filter + "%' LIMIT " + page + ", " + quantity);
         }
         else {
             sqlGetRows = db.prepare("SELECT " + pk + " AS ROWID, * FROM " + table + " LIMIT " + page + ", " + quantity);
@@ -75,10 +75,10 @@ function getTable(location, table, column, order, filter, quantity, page) {
     }
     else {
         if (column && order) {
-            sqlGetRows = db.prepare("SELECT ROWID AS ROWID, * FROM " + table + " ORDER BY " + column + " " + order + " LIMIT " + page + ", " + quantity);
+            sqlGetRows = db.prepare("SELECT ROWID AS ROWID, * FROM " + table + " ORDER BY [" + column + "] " + order + " LIMIT " + page + ", " + quantity);
         }
         else if (column && filter) {
-            sqlGetRows = db.prepare("SELECT ROWID AS ROWID, * FROM " + table + " WHERE " + column + " LIKE '%" + filter + "%' LIMIT " + page + ", " + quantity);
+            sqlGetRows = db.prepare("SELECT ROWID AS ROWID, * FROM " + table + " WHERE [" + column + "] LIKE '%" + filter + "%' LIMIT " + page + ", " + quantity);
         }
         else {
             sqlGetRows = db.prepare("SELECT ROWID AS ROWID, * FROM " + table + " LIMIT " + page + ", " + quantity);
@@ -132,10 +132,10 @@ function getView(location, view, column, order, filter, quantity, page) {
     let sqlGetRows;
 
     if (column && order) {
-        sqlGetRows = db.prepare("SELECT * FROM " + view + " ORDER BY " + column + " " + order);
+        sqlGetRows = db.prepare("SELECT * FROM " + view + " ORDER BY [" + column + "] " + order);
     }
     else if (column && filter) {
-        sqlGetRows = db.prepare("SELECT * FROM " + view + " WHERE " + column + " LIKE '%" + filter + "%'");
+        sqlGetRows = db.prepare("SELECT * FROM " + view + " WHERE [" + column + "] LIKE '%" + filter + "%'");
     }
     else {
         sqlGetRows = db.prepare("SELECT * FROM " + view);
@@ -145,10 +145,10 @@ function getView(location, view, column, order, filter, quantity, page) {
 
 
     if (column && order) {
-        sqlGetRows = db.prepare("SELECT  * FROM " + view + " ORDER BY " + column + " " + order + " LIMIT " + page + ", " + quantity);
+        sqlGetRows = db.prepare("SELECT  * FROM " + view + " ORDER BY [" + column + "] " + order + " LIMIT " + page + ", " + quantity);
     }
     else if (column && filter) {
-        sqlGetRows = db.prepare("SELECT * FROM " + view + " WHERE " + column + " LIKE '%" + filter + "%' LIMIT " + page + ", " + quantity);
+        sqlGetRows = db.prepare("SELECT * FROM " + view + " WHERE [" + column + "] LIKE '%" + filter + "%' LIMIT " + page + ", " + quantity);
     }
     else {
         sqlGetRows = db.prepare("SELECT  * FROM " + view + " LIMIT " + page + ", " + quantity);
